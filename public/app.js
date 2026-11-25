@@ -126,7 +126,7 @@ function pgPackages() {
   return `<div class="bar"><h1>${esc(t('nav.packages'))}</h1><span class="sp"></span>
     ${['open', 'done', 'all'].map((f) => `<button class="btn sm ${S.filter === f ? '' : 'ghost2'}" data-act="filter" data-f="${f}">${esc(t('f.' + f))}</button>`).join('')}
     ${role() === 'manager' ? `<button class="btn pri" data-act="newpackage">${esc(t('b.newPackage'))}</button>` : ''}</div>
-  <section class="card">${tbl([[t('f.name')], [t('pk.depart')], [t('f.kind')], [t('pk.occupancy'), 1]].concat(money ? [[[t('pk.prices')]]] : []).concat([['']]),
+  <section class="card">${tbl([[t('f.name')], [t('pk.depart')], [t('f.kind')], [t('pk.occupancy'), 1]].concat(money ? [[t('pk.prices')]] : []).concat([['']]),
     list.map((p) => `<tr><td><b>${esc(p.name)}</b><div class="small muted">${esc(p.makkah)}${p.madinah ? ' · ' + esc(p.madinah) : ''}</div></td>
     <td><b>${esc(dF(p.depart))}</b><div class="small muted">${esc(t('pk.return'))} ${esc(dF(p.return))} · ${esc(t('tr.' + p.transport))}</div></td>
     <td>${pill(t('pkg.' + p.kind), 'ice')} ${pill(t('pkg.' + (p.status === 'open' && p.depart >= d.today ? 'open' : 'closed')), p.status === 'open' && p.depart >= d.today ? 'ok' : '')}</td>
@@ -145,7 +145,7 @@ function pgBookings() {
   return `<div class="bar"><h1>${esc(t('nav.bookings'))}</h1><span class="sp"></span>
     ${['open', 'done', 'all'].map((f) => `<button class="btn sm ${S.filter === f ? '' : 'ghost2'}" data-act="filter" data-f="${f}">${esc(t('f.' + f))}</button>`).join('')}
     ${canBook() ? `<button class="btn pri" data-act="newbooking">${esc(t('b.newBooking'))}</button>` : ''}</div>
-  <section class="card">${tbl([[t('bk.code')], [t('bk.client')], [t('bk.package')], [t('bk.stage')], [t('bk.docs'), 1]].concat(money ? [[[t('bk.balance'), 1]]] : []).concat([['']]),
+  <section class="card">${tbl([[t('bk.code')], [t('bk.client')], [t('bk.package')], [t('bk.stage')], [t('bk.docs'), 1]].concat(money ? [[t('bk.balance'), 1]] : []).concat([['']]),
     list.map((b) => `<tr><td><b>${esc(b.code)}</b><div class="small muted">${esc(dF(b.depart))}</div></td>
     <td>${esc(b.clientName)}<div class="small muted">${nf(b.persons)} ${esc(t('bk.persons'))} · ${esc(t('rt.' + b.roomType))}</div></td>
     <td class="small">${esc(b.packageName)}</td>
@@ -281,7 +281,9 @@ function render() {
   const app = $('#app');
   if (!S.token || !S.me) { app.innerHTML = loginPage(); return; }
   if (!S.data) { app.innerHTML = `<main><p class="empty">${esc(t('loading'))}</p></main>`; return; }
-  app.innerHTML = shell((PAGES[route()] || pgDashboard)());
+  const r = route();
+  if (location.hash !== '#/' + r) history.replaceState(null, '', '#/' + r);
+  app.innerHTML = shell((PAGES[r] || pgDashboard)());
 }
 async function boot() {
   render();
@@ -320,8 +322,8 @@ async function doLogin() {
   if (!pin) return;
   try {
     const r = await api('POST', { type: 'login', pin });
-    S.token = r.token; S.me = r.user; LS.set('token', r.token); LS.set('me', r.user);
-    S.data = null; S.modal = null; location.hash = '#/' + NAV[r.user.role][0]; boot();
+    S.token = r.token; S.me = r.me; LS.set('token', r.token); LS.set('me', r.me);
+    S.data = null; S.modal = null; location.hash = '#/' + NAV[r.me.role][0]; boot();
   } catch (e) { toast(e.message, true); }
 }
 async function submitForm(form) {

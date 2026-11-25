@@ -132,7 +132,7 @@ ok((await body(p)).includes('1111'), 'sign-in lists demo roles with PINs');
 ok((await p.$('#pin')) !== null, 'PIN input present');
 await login(p, '1111');
 let tx = await body(p);
-ok(/Manager|مدير/.test(tx), 'manager lands on dashboard');
+ok(/manager|مدير/i.test(tx), 'manager lands on dashboard');
 ok(!bare.test(tx), 'dashboard: no undefined/NaN');
 await go(p, 'packages'); tx = await body(p);
 ok(tx.includes('Shawwal') || tx.includes('شوال') || tx.toLowerCase().includes('umrah') || tx.includes('عمرة'), 'packages page lists packages');
@@ -204,7 +204,7 @@ ok(!xtx.includes('<img src=x onerror'), 'client name is escaped in the DOM');
 // Arabic RTL
 const pr = await newPage(); await login(pr, '1111', 'ar');
 ok((await pr.evaluate(() => document.documentElement.dir)) === 'rtl', 'arabic renders RTL');
-ok((await body(pr)).includes('الباقات'), 'arabic nav translated');
+ok((await body(pr)).includes('الحجوزات'), 'arabic nav translated');
 await go(pr, 'bookings');
 ok(!bare.test(await body(pr)), 'arabic bookings: no undefined/NaN');
 
